@@ -1,0 +1,318 @@
+openapi: 3.1.0
+info:
+  title: Todo App Todos API
+  version: 1.0.0
+  description: API for todo CRUD operations
+
+servers:
+  - url: /api/todos
+    description: Todo endpoints base path
+
+paths:
+  /:
+    get:
+      summary: List all todos for authenticated user
+      description: Returns all todos owned by the authenticated user, sorted by creation date
+      operationId: listTodos
+      tags:
+        - Todos
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: isComplete
+          in: query
+          schema:
+            type: boolean
+          description: Optional filter by completion status
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Maximum number of todos to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of todos to skip (for pagination)
+      responses:
+        '200':
+          description: List of todos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  todos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        title:
+                          type: string
+                        isComplete:
+                          type: boolean
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                  total:
+                    type: integer
+        '401':
+          description: Not authenticated
+
+    post:
+      summary: Create a new todo
+      description: Creates a new todo for the authenticated user
+      operationId: createTodo
+      tags:
+        - Todos
+      security:
+        - SessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+                  description: Todo title/content
+                  example: Buy groceries
+      responses:
+        '201':
+          description: Todo created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  todo:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      title:
+                        type: string
+                      isComplete:
+                        type: boolean
+                        default: false
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Title is required
+        '401':
+          description: Not authenticated
+
+  /{todoId}:
+    get:
+      summary: Get a specific todo
+      description: Returns a single todo by ID, ensuring ownership
+      operationId: getTodo
+      tags:
+        - Todos
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Todo ID to retrieve
+      responses:
+        '200':
+          description: Todo found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  todo:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      title:
+                        type: string
+                      isComplete:
+                        type: boolean
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+        '404':
+          description: Todo not found or not owned by user
+        '401':
+          description: Not authenticated
+
+    patch:
+      summary: Update a todo
+      description: Updates an existing todo's title
+      operationId: updateTodo
+      tags:
+        - Todos
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Todo ID to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 500
+                  description: Updated todo title
+                isComplete:
+                  type: boolean
+                  description: Updated completion status
+      responses:
+        '200':
+          description: Todo updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  todo:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      title:
+                        type: string
+                      isComplete:
+                        type: boolean
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+        '400':
+          description: Validation error
+        '404':
+          description: Todo not found or not owned by user
+        '401':
+          description: Not authenticated
+
+    delete:
+      summary: Delete a todo
+      description: Deletes an existing todo
+      operationId: deleteTodo
+      tags:
+        - Todos
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Todo ID to delete
+      responses:
+        '204':
+          description: Todo deleted successfully (no content)
+        '404':
+          description: Todo not found or not owned by user
+        '401':
+          description: Not authenticated
+
+  /{todoId}/toggle:
+    post:
+      summary: Toggle todo completion status
+      description: Toggles a todo between complete and incomplete states
+      operationId: toggleTodo
+      tags:
+        - Todos
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Todo ID to toggle
+      responses:
+        '200':
+          description: Todo toggled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  todo:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      title:
+                        type: string
+                      isComplete:
+                        type: boolean
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+        '404':
+          description: Todo not found or not owned by user
+        '401':
+          description: Not authenticated
+
+components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: HTTP-only session cookie for authentication

@@ -1,0 +1,10 @@
+fastapi
+sqlmodel
+uvicorn
+alembic
+bcrypt
+python-multipart
+pydantic
+pydantic[email]
+pydantic-settings
+psycopg2-binary
