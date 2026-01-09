@@ -5,8 +5,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Todo App",
-  description: "Evolution of Todo Phase II",
+  title: "Todo App - Manage Your Tasks",
+  description: "A professional, modern todo application for managing your daily tasks.",
+  viewport: "width=device-width, initial-scale=1.0, viewport-fit=cover",
 };
 
 export default function RootLayout({
@@ -15,8 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className="scroll-smooth">
+      <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
+        <div className="min-h-screen flex flex-col">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

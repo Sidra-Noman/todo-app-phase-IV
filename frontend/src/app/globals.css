@@ -1,3 +1,144 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================================
+   GLOBAL STYLES & RESETS
+   ============================================================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-gray-900 font-sans;
+}
+
+/* Reset default form styles */
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Focus ring styles for all interactive elements */
+:focus-visible {
+  @apply outline-none ring-2 ring-offset-2 ring-indigo-600;
+}
+
+/* Remove default button styles */
+button {
+  @apply cursor-pointer;
+}
+
+/* ============================================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================================ */
+
+.text-h1 {
+  @apply font-bold leading-10;
+  font-size: 32px;
+  line-height: 40px;
+}
+
+.text-h2 {
+  @apply font-bold;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.text-h3 {
+  @apply font-semibold;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.text-body {
+  @apply font-normal;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.text-body-sm {
+  @apply font-normal;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.text-caption {
+  @apply font-normal;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* ============================================================================
+   COLOR & CONTRAST UTILITIES
+   ============================================================================ */
+
+.text-primary {
+  @apply text-gray-900;
+}
+
+.text-secondary {
+  @apply text-gray-600;
+}
+
+.text-tertiary {
+  @apply text-gray-500;
+}
+
+.text-disabled {
+  @apply text-gray-400;
+}
+
+/* ============================================================================
+   SPACING UTILITIES
+   ============================================================================ */
+
+.space-xs {
+  @apply gap-1;
+}
+
+.space-sm {
+  @apply gap-2;
+}
+
+.space-md {
+  @apply gap-4;
+}
+
+.space-lg {
+  @apply gap-6;
+}
+
+.space-xl {
+  @apply gap-8;
+}
+
+/* ============================================================================
+   COMMON COMPONENT PATTERNS
+   ============================================================================ */
+
+/* Content container with max-width constraint */
+.container-content {
+  @apply max-w-content mx-auto px-6;
+}
+
+/* Professional shadow styles */
+.shadow-professional-sm {
+  @apply shadow-sm;
+}
+
+.shadow-professional-md {
+  @apply shadow-md;
+}
+
+/* Focus visible state (for keyboard navigation) */
+.focus-ring {
+  @apply focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2;
+}
+
+/* Smooth transitions for all interactive elements */
+.transition-smooth {
+  @apply transition-all duration-feedback ease-out;
+}
