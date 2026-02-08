@@ -1,0 +1,240 @@
+openapi: 3.1.0
+info:
+  title: Todo App Chatbot API
+  version: 1.0.0
+  description: API for AI-powered chatbot interactions with todo functionality
+
+servers:
+  - url: /api/chat
+    description: Chatbot endpoints base path
+
+paths:
+  /:
+    post:
+      summary: Send message to chatbot
+      description: Sends a user message to the AI chatbot and receives a response with any todo operations performed
+      operationId: sendMessage
+      tags:
+        - Chat
+      security:
+        - SessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+                  description: User's natural language message to the chatbot
+                  example: "Add a todo to buy groceries"
+                conversationId:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Existing conversation ID (optional, creates new if not provided)
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Chatbot response with any todo operations performed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: string
+                    description: Chatbot's natural language response
+                    example: "I've added 'buy groceries' to your todos."
+                  conversationId:
+                    type: string
+                    format: uuid
+                    description: ID of the conversation (new or existing)
+                  todos:
+                    type: array
+                    description: Any todos affected by the conversation
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        title:
+                          type: string
+                        isComplete:
+                          type: boolean
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                  action:
+                    type: string
+                    enum: [none, add, list, update, delete, complete]
+                    description: The action taken by the chatbot
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Message is required"
+        '401':
+          description: Not authenticated
+        '500':
+          description: AI service error
+
+  /conversations:
+    get:
+      summary: List user's conversations
+      description: Returns all conversations for the authenticated user, sorted by last activity
+      operationId: listConversations
+      tags:
+        - Chat
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum number of conversations to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of conversations to skip (for pagination)
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        title:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                  total:
+                    type: integer
+        '401':
+          description: Not authenticated
+
+  /conversations/{conversationId}:
+    get:
+      summary: Get conversation history
+      description: Returns the full message history for a specific conversation
+      operationId: getConversation
+      tags:
+        - Chat
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Conversation ID to retrieve
+      responses:
+        '200':
+          description: Conversation history with messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversation:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      title:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        role:
+                          type: string
+                          enum: [user, assistant]
+                        content:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+        '404':
+          description: Conversation not found or not owned by user
+        '401':
+          description: Not authenticated
+
+    delete:
+      summary: Delete conversation
+      description: Deletes a conversation and all its messages
+      operationId: deleteConversation
+      tags:
+        - Chat
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Conversation ID to delete
+      responses:
+        '204':
+          description: Conversation deleted successfully (no content)
+        '404':
+          description: Conversation not found or not owned by user
+        '401':
+          description: Not authenticated
+
+components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: HTTP-only session cookie for authentication

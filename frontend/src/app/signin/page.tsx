@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { apiFetch } from '@/services/api';
 
 export default function SigninPage() {
   const router = useRouter();
@@ -20,15 +20,23 @@ export default function SigninPage() {
     setLoading(true);
 
     try {
-      await apiFetch('/auth/signin', {
-        method: 'POST',
-        body: JSON.stringify(formData),
+      // Use NextAuth signIn with credentials - this should sync with backend cookies
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false, // Disable automatic redirect, we'll handle it manually
       });
-      // Simple cookie-based auth check: navigation will happen
-      router.push('/todos');
-      router.refresh(); // Ensure layout clears cached auth state
+
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.ok) {
+        // Wait a brief moment to ensure NextAuth state is updated
+        // before navigating to protected route
+        await new Promise(resolve => setTimeout(resolve, 300));
+        router.push('/todos');
+      }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'An error occurred during sign in');
     } finally {
       setLoading(false);
     }

@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/services/api';
 import { Todo } from '@/types';
 import { LogOut, Trash2, CheckCircle, Circle, Plus, Edit2, X, Check } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 export default function TodosPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [appLoading, setAppLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -19,16 +21,28 @@ export default function TodosPage() {
     try {
       const data = await apiFetch('/todos/');
       setTodos(data.todos);
-    } catch (err) {
-      router.push('/signin');
+    } catch (err: any) {
+      // Only redirect to signin if it's an authentication error
+      if (err.message.includes('401') || err.message.toLowerCase().includes('unauthorized') || err.message.toLowerCase().includes('not authenticated')) {
+        router.push('/signin');
+      } else {
+        console.error('Error fetching todos:', err);
+      }
     } finally {
-      setLoading(false);
+      setAppLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTodos();
-  }, []);
+    // Check if user is authenticated before loading todos
+    if (status !== 'loading') {
+      if (!session) {
+        router.push('/signin');
+      } else {
+        fetchTodos();
+      }
+    }
+  }, [session, status]);
 
   const handleAddTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +109,9 @@ export default function TodosPage() {
 
   const handleSignout = async () => {
     try {
+      // Use NextAuth's signOut function which handles both backend and frontend state
+      await import('next-auth/react').then(({ signOut }) => signOut({ redirect: false }));
+      // Also call our backend signout to ensure session cookie is cleared
       await apiFetch('/auth/signout', { method: 'POST' });
       router.push('/signin');
     } catch (err) {
@@ -102,14 +119,22 @@ export default function TodosPage() {
     }
   };
 
-  if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  if (appLoading || status === 'loading') return <div className="flex h-screen items-center justify-center">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       <nav className="bg-white shadow">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center">
-            <h1 className="text-xl font-bold text-gray-900">My Todos</h1>
+            <div className="flex space-x-4">
+              <h1 className="text-xl font-bold text-gray-900 self-center">My Todos</h1>
+              <a
+                href="/chat"
+                className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+              >
+                💬 AI Assistant
+              </a>
+            </div>
             <button
               onClick={handleSignout}
               className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"

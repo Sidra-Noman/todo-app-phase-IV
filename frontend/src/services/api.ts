@@ -3,15 +3,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   const url = `${API_URL}${endpoint}`;
 
-  // In Phase II, we assume the backend handles session cookies
-  // 'include' credentials for cross-origin if needed
+  // Include credentials (cookies) for authentication
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    credentials: options.credentials || 'include',
+    credentials: 'include', // Always include credentials for auth
   });
 
   if (!response.ok) {

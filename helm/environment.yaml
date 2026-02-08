@@ -1,0 +1,6 @@
+# Environment variables for containerized Todo application
+DATABASE_URL=postgresql://user:password@postgres:5432/todo_db
+COHERE_API_KEY=your_cohere_api_key_here
+BETTER_AUTH_SECRET=your_better_auth_secret_here
+NEXT_PUBLIC_BETTER_AUTH_URL=http://todo-app-frontend:3000
+NEXT_PUBLIC_BACKEND_API_URL=http://todo-app-backend:8000

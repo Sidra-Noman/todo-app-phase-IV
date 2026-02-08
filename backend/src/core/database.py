@@ -1,8 +1,8 @@
 from sqlmodel import create_engine, Session, SQLModel
 from .config import settings
-from ..models import user, todo
+from ..models import user, todo, conversation, message
 
-engine = create_engine(settings.DATABASE_URL)
+engine = create_engine(settings.database_url)
 
 def init_db():
     SQLModel.metadata.create_all(engine)

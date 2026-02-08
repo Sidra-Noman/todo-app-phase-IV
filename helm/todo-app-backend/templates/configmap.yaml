@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "todo-app-backend.fullname" . }}-config
+  labels:
+    {{- include "todo-app-backend.labels" . | nindent 4 }}
+data:
+  # Application configuration
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
+  DEBUG: "false"
+
+  # Database configuration (non-sensitive parts)
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "todo_db"
+  DB_SSL_MODE: "require"
+
+  # API configuration
+  API_TIMEOUT: "30s"
+  MAX_CONNECTIONS: "100"
+
+  # AI service configuration
+  AI_SERVICE_TIMEOUT: "60s"
+  AI_MAX_RETRIES: "3"
+
+  # Cache configuration
+  CACHE_TTL: "3600"
+  CACHE_TYPE: "memory"
+
+  # Feature flags
+  ENABLE_ANALYTICS: "true"
+  ENABLE_EMAIL_NOTIFICATIONS: "false"
