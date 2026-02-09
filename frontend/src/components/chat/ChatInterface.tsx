@@ -49,7 +49,7 @@ export const ChatInterface = ({ initialMessages = [], conversationId }: ChatInte
       // Send message to backend
       const chatRequest: ChatRequest = {
         message: inputValue,
-        conversationId: conversationId || undefined,
+        conversation_id: conversationId || undefined,
       };
 
       const response: ChatResponse = await sendMessage(chatRequest);
